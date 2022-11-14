@@ -7,7 +7,7 @@ namespace Library.Data
         public int Id { get; set; }
         public string Name { get; set; }
         public string ISBN { get; set; }
-        public virtual List<Author> Authors { get; set; }
+        public virtual IList<Author> Authors { get; set; }
 
     }
 }

@@ -13,64 +13,28 @@ namespace Library.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Book>()
-                .Property(x => x.Name)
-                .IsRequired()
-                .HasMaxLength(50);
+            modelBuilder.Entity<Book>(eb =>
+            {
+                eb.Property(n => n.Name).IsRequired();
+                eb.Property(n => n.Name).HasMaxLength(50);
+                eb.Property(i => i.ISBN).IsRequired();
+                eb.Property(i => i.ISBN).HasMaxLength(13);
 
-            modelBuilder.Entity<Book>()
-                .Property(x => x.ISBN)
-                .IsRequired()
-                .HasMaxLength(20);
+                eb.HasMany(a => a.Authors)
+                .WithMany(b => b.Books);
+            });
 
-            modelBuilder.Entity<Author>()
-                .Property(x => x.FirstName)
-                .IsRequired()
-                .HasMaxLength(50);
+            modelBuilder.Entity<Author>(eb =>
+            {
+                eb.Property(f => f.FirstName).IsRequired();
+                eb.Property(f => f.FirstName).HasMaxLength(50);
+                eb.Property(l => l.LastName).IsRequired();
+                eb.Property(l => l.LastName).HasMaxLength(50);
 
-            modelBuilder.Entity<Author>()
-                .Property(x => x.LastName)
-                .IsRequired()
-                .HasMaxLength(50);
+                //eb.HasMany(a => a.Books)
+                //.WithMany(b => b.Authors);
+            });
 
-            //modelBuilder.Entity<Book>().HasData(
-            //    new Book()
-            //    {
-            //        Id = 1,
-            //        Name = "Krzyżacy",
-            //        ISBN = "1234567890",
-            //        Authors = new List<Author>
-            //       {
-            //           new Author()
-            //           {
-            //               Id = 1,
-            //               FirstName = "Henryk",
-            //               LastName = "Sienkiewicz"
-            //           }
-            //       }
-            //    },
-            //   new Book()
-            //   {
-            //       Id = 2,
-            //       Name = "Programming Entity Framework: DbContext",
-            //       ISBN = "0987654321",
-            //       Authors = new List<Author>
-            //       {
-            //           new Author()
-            //           {
-            //               Id = 2,
-            //               FirstName = "Julia",
-            //               LastName = "Lerman"
-            //           },
-            //           new Author()
-            //           {
-            //               Id = 3,
-            //               FirstName = "Rowan",
-            //               LastName = "Miller"
-            //           }
-            //       }
-            //   }
-            //    );
 
         }
     }

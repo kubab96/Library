@@ -1,4 +1,5 @@
 using Library;
+using Library.Configurations;
 using Library.Data;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -33,6 +34,8 @@ builder.Services.AddCors(x =>
     .AllowAnyMethod());
 });
 
+builder.Services.AddAutoMapper(typeof(MapperInitializer));
+
 builder.Services.AddDbContext<LibraryDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("sqlConnection")));
 
@@ -51,8 +54,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-app.UseCors("AllowAny");
 
 app.UseAuthorization();
 
