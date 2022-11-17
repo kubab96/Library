@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations;
 
 namespace Library.Models
 {
@@ -10,13 +11,16 @@ namespace Library.Models
         [Required]
         [MaxLength(50, ErrorMessage = "Last name is too long")]
         public string LastName { get; set; }
-        [Required]
-        public int BookId { get; set; }
     }
     public class AuthorDTO : CreateAuthorDTO
     {
         public int Id { get; set; }
-        public IList<BookDTO> Books { get; set; }
-
+        public IList<BookOnlyDTO> Books { get; set; }
     }
+
+    public class AuthorOnlyDTO : CreateAuthorDTO
+    {
+        public int Id { get; set; }
+    }
+
 }

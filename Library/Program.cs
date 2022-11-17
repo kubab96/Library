@@ -1,6 +1,8 @@
 using Library;
 using Library.Configurations;
 using Library.Data;
+using Library.IRepository;
+using Library.Repository;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
@@ -20,7 +22,9 @@ builder.Logging.ClearProviders();
 builder.Host.UseSerilog();
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddNewtonsoftJson(option => 
+option.SerializerSettings.ReferenceLoopHandling = 
+Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -35,6 +39,8 @@ builder.Services.AddCors(x =>
 });
 
 builder.Services.AddAutoMapper(typeof(MapperInitializer));
+
+builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddDbContext<LibraryDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("sqlConnection")));
