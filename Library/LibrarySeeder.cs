@@ -1,4 +1,5 @@
 ﻿using Library.Data;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 
@@ -49,6 +50,24 @@ namespace Library
                 {
                     bookList = _dbContext.Books.ToList();
                 }
+
+                List<IdentityRole> rolesList;
+
+                if (!_dbContext.Roles.Any())
+                {
+                    rolesList = new List<IdentityRole>
+                    {
+                        new IdentityRole { Name = "User", NormalizedName = "USER" },
+                        new IdentityRole { Name = "Administrator", NormalizedName = "ADMINISTRATOR" }
+
+                    };
+                    _dbContext.Roles.AddRange(rolesList);
+                }
+                else
+                {
+                    rolesList = _dbContext.Roles.ToList();
+                }
+
                 _dbContext.SaveChanges();
             }
         }

@@ -14,8 +14,9 @@ namespace Library.Configurations
             CreateMap<Author, AuthorDTO>().ReverseMap();
             CreateMap<Author, CreateAuthorDTO>().ReverseMap();
             CreateMap<Author, AuthorOnlyDTO>().ReverseMap();
+            CreateMap<ApiUser, UserDTO>().ReverseMap();
 
-            
+
         } 
     }
 }

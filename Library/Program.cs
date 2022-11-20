@@ -3,12 +3,16 @@ using Library.Configurations;
 using Library.Data;
 using Library.IRepository;
 using Library.Repository;
+using Library.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Events;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 // Serilog Setup
 Log.Logger = new LoggerConfiguration()
@@ -22,8 +26,8 @@ builder.Logging.ClearProviders();
 builder.Host.UseSerilog();
 
 // Add services to the container.
-builder.Services.AddControllers().AddNewtonsoftJson(option => 
-option.SerializerSettings.ReferenceLoopHandling = 
+builder.Services.AddControllers().AddNewtonsoftJson(option =>
+option.SerializerSettings.ReferenceLoopHandling =
 Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -41,9 +45,15 @@ builder.Services.AddCors(x =>
 builder.Services.AddAutoMapper(typeof(MapperInitializer));
 
 builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IAuthManager, AuthManager>();
 
 builder.Services.AddDbContext<LibraryDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("sqlConnection")));
+
+builder.Services.AddAuthentication();
+
+builder.Services.ConfigureIdentity();
+builder.Services.ConfigureJWT(builder.Configuration);
 
 builder.Services.AddScoped<LibrarySeeder, LibrarySeeder>();
 
@@ -61,6 +71,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
