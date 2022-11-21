@@ -11,6 +11,7 @@ namespace Library.Configurations
             CreateMap<Book, BookDTO>().ReverseMap();
             CreateMap<Book, CreateBookDTO>().ReverseMap();
             CreateMap<Book, BookOnlyDTO>().ReverseMap();
+            CreateMap<Book, UpdateBookDTO>().ReverseMap();
             CreateMap<Author, AuthorDTO>().ReverseMap();
             CreateMap<Author, CreateAuthorDTO>().ReverseMap();
             CreateMap<Author, AuthorOnlyDTO>().ReverseMap();

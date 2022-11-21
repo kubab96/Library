@@ -27,6 +27,9 @@ namespace Library.Controllers
 
         [HttpPost]
         [Route("register")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status202Accepted)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> Register([FromBody] UserDTO userDTO)
         {
             _logger.LogInformation($"Registration attempt for {userDTO.Email}");
@@ -72,6 +75,9 @@ namespace Library.Controllers
 
         [HttpPost]
         [Route("login")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status202Accepted)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> Login([FromBody] LoginUserDTO userDTO)
         {
             _logger.LogInformation($"Login attempt for {userDTO.Email}");

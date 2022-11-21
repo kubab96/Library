@@ -9,18 +9,25 @@ namespace Library.Models
         [MaxLength(50, ErrorMessage = "Name is too long")]
         public string Name { get; set; }
         [Required]
-        [MaxLength(13, ErrorMessage = "ISBN is too long")]
-        [MinLength(13, ErrorMessage = "ISBN is too short")]
         public string ISBN { get; set; }
-        //[Range(1,5)]
-        //public double Rating { get; set; }
         [Required]
-        public int AuthorId { get; set; }
+        public IList<CreateAuthorDTO> Authors { get; set; }
     }
 
-    public class BookDTO : CreateBookDTO
+    public class UpdateBookDTO
+    {
+        [Required]
+        public string Name { get; set; }
+        [Required]
+        public string ISBN { get; set; }
+        public IList<CreateAuthorDTO> Authors { get; set; }
+    }
+
+    public class BookDTO
     {
         public int Id { get; set; }
+        public string Name { get; set; }
+        public string ISBN { get; set; }
         public IList<AuthorOnlyDTO> Authors { get; set; }
     }
 

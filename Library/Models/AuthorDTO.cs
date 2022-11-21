@@ -12,15 +12,23 @@ namespace Library.Models
         [MaxLength(50, ErrorMessage = "Last name is too long")]
         public string LastName { get; set; }
     }
-    public class AuthorDTO : CreateAuthorDTO
+    public class AuthorDTO
     {
         public int Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
         public IList<BookOnlyDTO> Books { get; set; }
     }
 
-    public class AuthorOnlyDTO : CreateAuthorDTO
+    public class AuthorOnlyDTO
     {
         public int Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
     }
 
+    //public class CreateAuthorWithBook
+    //{
+    //    public IList<BookOnlyDTO> Books { get; set; }
+    //}
 }
