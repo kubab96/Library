@@ -1,3 +1,4 @@
+using AspNetCoreRateLimit;
 using Library;
 using Library.Configurations;
 using Library.Data;
@@ -50,6 +51,13 @@ builder.Services.AddScoped<IAuthManager, AuthManager>();
 builder.Services.AddDbContext<LibraryDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("sqlConnection")));
 
+builder.Services.AddMemoryCache();
+
+builder.Services.ConfigureRateLimiting();
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.ConfigureHttpCacheHeaders();
+
 builder.Services.AddAuthentication();
 
 builder.Services.ConfigureIdentity();
@@ -69,9 +77,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.ConfigureExceptionHandler();
+
 app.UseHttpsRedirection();
 
+app.UseHttpCacheHeaders();
+app.UseIpRateLimiting();
+
 app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.MapControllers();

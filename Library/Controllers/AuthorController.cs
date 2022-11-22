@@ -28,17 +28,9 @@ namespace Library.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> GetAuthors()
         {
-            try
-            {
-                var authors = await _unitOfWork.Authors.GetAll();
-                var results = _mapper.Map<IList<AuthorDTO>>(authors);
-                return Ok(results);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Something went wrong in {nameof(GetAuthors)}");
-                return StatusCode(500);
-            }
+            var authors = await _unitOfWork.Authors.GetAll();
+            var results = _mapper.Map<IList<AuthorDTO>>(authors);
+            return Ok(results);
         }
 
         [HttpGet("{id:int}", Name = "GetAuthor")]
@@ -46,17 +38,9 @@ namespace Library.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> GetAuthor(int id)
         {
-            try
-            {
-                var author = await _unitOfWork.Authors.Get(x => x.Id == id, new List<string> { "Books" });
-                var result = _mapper.Map<AuthorDTO>(author);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Something went wrong in {nameof(GetAuthor)}");
-                return StatusCode(500);
-            }
+            var author = await _unitOfWork.Authors.Get(x => x.Id == id, new List<string> { "Books" });
+            var result = _mapper.Map<AuthorDTO>(author);
+            return Ok(result);
         }
 
         //[Authorize(Roles = "Administrator")]
@@ -71,18 +55,10 @@ namespace Library.Controllers
                 _logger.LogError($"Invalid post attempt in {nameof(CreateAuthor)}");
                 return BadRequest(ModelState);
             }
-            try
-            {
-                var author = _mapper.Map<Author>(createAuthorDTO);
-                await _unitOfWork.Authors.Insert(author);
-                await _unitOfWork.Save();
-                return CreatedAtRoute("GetAuthor", new { id = author.Id }, author);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Something went wrong in {nameof(CreateAuthor)}");
-                return StatusCode(500);
-            }
+            var author = _mapper.Map<Author>(createAuthorDTO);
+            await _unitOfWork.Authors.Insert(author);
+            await _unitOfWork.Save();
+            return CreatedAtRoute("GetAuthor", new { id = author.Id }, author);
         }
 
         [HttpPut("{id:int}")]
@@ -96,25 +72,17 @@ namespace Library.Controllers
                 _logger.LogError($"Invalid put attempt in {nameof(UpdateAuthor)}");
                 return BadRequest(ModelState);
             }
-            try
+            var author = await _unitOfWork.Authors.Get(x => x.Id == id);
+            if (author == null)
             {
-                var author = await _unitOfWork.Authors.Get(x => x.Id == id);
-                if (author == null)
-                {
-                    _logger.LogError($"Invalid put attempt in {nameof(UpdateAuthor)}");
-                    return BadRequest("Invalid data");
-                }
-                _mapper.Map(createAuthorDTO, author);
+                _logger.LogError($"Invalid put attempt in {nameof(UpdateAuthor)}");
+                return BadRequest("Invalid data");
+            }
+            _mapper.Map(createAuthorDTO, author);
 
-                _unitOfWork.Authors.Update(author);
-                await _unitOfWork.Save();
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Something went wrong in {nameof(UpdateAuthor)}");
-                return StatusCode(500);
-            }
+            _unitOfWork.Authors.Update(author);
+            await _unitOfWork.Save();
+            return NoContent();
         }
 
         [HttpDelete("{id:int}")]
@@ -128,26 +96,17 @@ namespace Library.Controllers
                 _logger.LogError($"Invalid DELETE attempt in {nameof(DeleteAuthor)}");
                 return BadRequest();
             }
-            try
+            var author = await _unitOfWork.Authors.Get(x => x.Id == id);
+            if (author == null)
             {
-                var author = await _unitOfWork.Authors.Get(x => x.Id == id);
-                if (author == null)
-                {
-                    _logger.LogError($"Invalid DELETE attempt in {nameof(DeleteAuthor)}");
-                    return BadRequest("Invalid data");
-                }
-
-                await _unitOfWork.Authors.Delete(id);
-                await _unitOfWork.Save();
-
-                return NoContent();
+                _logger.LogError($"Invalid DELETE attempt in {nameof(DeleteAuthor)}");
+                return BadRequest("Invalid data");
             }
-            catch (Exception ex)
-            {
 
-                _logger.LogError(ex, $"Something went wrong in {nameof(DeleteAuthor)}");
-                return StatusCode(500);
-            }
+            await _unitOfWork.Authors.Delete(id);
+            await _unitOfWork.Save();
+
+            return NoContent();
         }
     }
 }

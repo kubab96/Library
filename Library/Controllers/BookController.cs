@@ -2,6 +2,7 @@
 using Library.Data;
 using Library.IRepository;
 using Library.Models;
+using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -18,28 +19,21 @@ namespace Library
 
         public BookController(IUnitOfWork unitOfWork, ILogger<BookController> logger, IMapper mapper)
         {
-            _unitOfWork = unitOfWork;   
+            _unitOfWork = unitOfWork;
             _logger = logger;
             _mapper = mapper;
         }
 
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = 60)]        
+        [HttpCacheValidation(MustRevalidate = false)]                                   
+        [ProducesResponseType(StatusCodes.Status200OK)] 
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> GetBooks()
+        public async Task<ActionResult> GetBooks([FromQuery] RequestParams requestParams)
         {
-            try
-            {
-                var books = await _unitOfWork.Books.GetAll();
-                var results = _mapper.Map<IList<BookDTO>>(books);
-                return Ok(results);
-            }
-            catch (Exception ex)
-            {
-
-                _logger.LogError(ex, $"Something went wrong in {nameof(GetBooks)}");
-                return StatusCode(500);
-            }
+            var books = await _unitOfWork.Books.GetPagedList(requestParams, new List<string> { "Authors" });
+            var results = _mapper.Map<IList<BookDTO>>(books);
+            return Ok(results);
         }
 
         [HttpGet("{id:int}", Name = "GetBook")]
@@ -47,18 +41,9 @@ namespace Library
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> GetBook(int id)
         {
-            try
-            {
-                var book = await _unitOfWork.Books.Get(x => x.Id == id, new List<string> { "Authors" });
-                var result = _mapper.Map<BookDTO>(book);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-
-                _logger.LogError(ex, $"Something went wrong in {nameof(GetBook)}");
-                return StatusCode(500);
-            }
+            var book = await _unitOfWork.Books.Get(x => x.Id == id, new List<string> { "Authors" });
+            var result = _mapper.Map<BookDTO>(book);
+            return Ok(result);
         }
 
         [HttpPost]
@@ -72,19 +57,11 @@ namespace Library
                 _logger.LogError($"Invalid POST attempt in {nameof(CreateBook)}");
                 return BadRequest(ModelState);
             }
-            try
-            {
-                var book = _mapper.Map<Book>(createBookDTO);
+            var book = _mapper.Map<Book>(createBookDTO);
 
-                await _unitOfWork.Books.Insert(book);
-                await _unitOfWork.Save();
-                return CreatedAtRoute("GetBook", new { id = book.Id }, book);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Something went wrong in {nameof(CreateBook)}");
-                return StatusCode(500);
-            }
+            await _unitOfWork.Books.Insert(book);
+            await _unitOfWork.Save();
+            return CreatedAtRoute("GetBook", new { id = book.Id }, book);
         }
 
         [HttpPut("{id:int}")]
@@ -98,25 +75,17 @@ namespace Library
                 _logger.LogError($"Invalid PUT attempt in {nameof(UpdateBook)}");
                 return BadRequest(ModelState);
             }
-            try
+            var book = await _unitOfWork.Books.Get(x => x.Id == id, new List<string> { "Authors" });
+            if (book == null)
             {
-                var book = await _unitOfWork.Books.Get(x => x.Id == id, new List<string> { "Authors" });
-                if(book == null)
-                {
-                    _logger.LogError($"Invalid PUT attempt in {nameof(UpdateBook)}");
-                    return BadRequest("Invalid data");
-                }
-                _mapper.Map(updateBookDTO, book);
+                _logger.LogError($"Invalid PUT attempt in {nameof(UpdateBook)}");
+                return BadRequest("Invalid data");
+            }
+            _mapper.Map(updateBookDTO, book);
 
-                _unitOfWork.Books.Update(book);
-                await _unitOfWork.Save();
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Something went wrong in {nameof(UpdateBook)}");
-                return StatusCode(500);
-            }
+            _unitOfWork.Books.Update(book);
+            await _unitOfWork.Save();
+            return NoContent();
         }
 
         [HttpDelete("{id:int}")]
@@ -130,26 +99,17 @@ namespace Library
                 _logger.LogError($"Invalid DELETE attempt in {nameof(DeleteBook)}");
                 return BadRequest();
             }
-            try
+            var book = await _unitOfWork.Books.Get(x => x.Id == id);
+            if (book == null)
             {
-                var book = await _unitOfWork.Books.Get(x => x.Id == id);
-                if (book == null)
-                {
-                    _logger.LogError($"Invalid DELETE attempt in {nameof(DeleteBook)}");
-                    return BadRequest("Invalid data");
-                }
-
-                await _unitOfWork.Books.Delete(id);
-                await _unitOfWork.Save();
-
-                return NoContent();
+                _logger.LogError($"Invalid DELETE attempt in {nameof(DeleteBook)}");
+                return BadRequest("Invalid data");
             }
-            catch (Exception ex)
-            {
 
-                _logger.LogError(ex, $"Something went wrong in {nameof(DeleteBook)}");
-                return StatusCode(500);
-            }
+            await _unitOfWork.Books.Delete(id);
+            await _unitOfWork.Save();
+
+            return NoContent();
         }
     }
 }

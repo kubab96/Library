@@ -1,4 +1,6 @@
-﻿using System.Linq.Expressions;
+﻿using Library.Models;
+using System.Linq.Expressions;
+using X.PagedList;
 
 namespace Library.IRepository
 {
@@ -7,6 +9,11 @@ namespace Library.IRepository
         Task<List<T>> GetAll(
                 Expression<Func<T, bool>> expression = null,
                 Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
+                List<string> includes = null
+            );
+
+        Task<IPagedList<T>> GetPagedList(
+                RequestParams requestParams,
                 List<string> includes = null
             );
 

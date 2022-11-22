@@ -1,6 +1,9 @@
 ﻿using Library.Data;
 using Library.IRepository;
+using Library.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
+using X.PagedList;
 
 namespace Library.Repository
 {
@@ -63,6 +66,21 @@ namespace Library.Repository
             }
 
             return await query.AsNoTracking().ToListAsync();
+        }
+
+        public async Task<X.PagedList.IPagedList<T>> GetPagedList(RequestParams requestParams, List<string> includes = null)
+        {
+            IQueryable<T> query = _db;
+
+            if (includes != null)
+            {
+                foreach (var includeProperty in includes)
+                {
+                    query = query.Include(includeProperty);
+                }
+            }
+
+            return await query.AsNoTracking().ToPagedListAsync(requestParams.PageNumber, requestParams.PageSize);
         }
 
         public async Task Insert(T entity)
